@@ -2,4 +2,3 @@ Django>=5.2,<6
 djangorestframework>=3.16,<4
 django-cors-headers>=4.9,<5
 django-filter>=25,<27
-Pillow>=11,<14

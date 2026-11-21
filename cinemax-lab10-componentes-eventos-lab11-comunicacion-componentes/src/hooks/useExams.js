@@ -1,12 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { describeRequestError } from '../services/apiClient'
-import { getCategories } from '../services/categoryService'
-import { deleteProduct, getProducts } from '../services/productService'
+import { deleteExam, getExams } from '../services/examService'
 
-export default function useCatalog() {
-  const [categories, setCategories] = useState([])
-  const [products, setProducts] = useState([])
-  const [selectedCategoryId, setSelectedCategoryId] = useState('')
+export default function useExams() {
+  const [exams, setExams] = useState([])
   const [status, setStatus] = useState('loading')
   const [error, setError] = useState(null)
   const [actionError, setActionError] = useState(null)
@@ -15,19 +12,15 @@ export default function useCatalog() {
   useEffect(() => {
     let cancelled = false
 
-    async function loadCatalog() {
+    async function loadExams() {
       setStatus('loading')
       setActionError(null)
       try {
-        const [categoryList, productList] = await Promise.all([
-          getCategories(),
-          getProducts(selectedCategoryId),
-        ])
+        const examList = await getExams()
         if (cancelled) {
           return
         }
-        setCategories(categoryList)
-        setProducts(productList)
+        setExams(examList)
         setError(null)
         setStatus('data')
       } catch (requestError) {
@@ -39,20 +32,20 @@ export default function useCatalog() {
       }
     }
 
-    loadCatalog()
+    loadExams()
     return () => {
       cancelled = true
     }
-  }, [selectedCategoryId, reloadToken])
+  }, [reloadToken])
 
   const retry = useCallback(() => {
     setReloadToken((token) => token + 1)
   }, [])
 
-  const removeProduct = useCallback(async (productId) => {
+  const removeExam = useCallback(async (examId) => {
     try {
-      await deleteProduct(productId)
-      setProducts((current) => current.filter((item) => item.id !== productId))
+      await deleteExam(examId)
+      setExams((current) => current.filter((exam) => exam.id !== examId))
       setActionError(null)
       return true
     } catch (requestError) {
@@ -64,15 +57,12 @@ export default function useCatalog() {
   const clearActionError = useCallback(() => setActionError(null), [])
 
   return {
-    categories,
-    products,
-    selectedCategoryId,
-    setSelectedCategoryId,
+    exams,
     status,
     error,
     actionError,
     retry,
-    removeProduct,
+    removeExam,
     clearActionError,
   }
 }

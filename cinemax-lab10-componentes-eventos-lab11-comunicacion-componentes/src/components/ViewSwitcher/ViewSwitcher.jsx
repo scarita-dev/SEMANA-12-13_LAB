@@ -1,5 +1,5 @@
 function ViewSwitcher({ view, onChange }) {
-  const activeView = view === 'movies' ? 'movies' : 'catalog'
+  const activeView = view === 'movies' ? 'movies' : 'exams'
 
   return (
     <nav className="view-switcher container" aria-label="Application sections">
@@ -16,12 +16,12 @@ function ViewSwitcher({ view, onChange }) {
       <button
         type="button"
         className={`view-switcher__button${
-          activeView === 'catalog' ? ' view-switcher__button--active' : ''
+          activeView === 'exams' ? ' view-switcher__button--active' : ''
         }`}
-        aria-pressed={activeView === 'catalog'}
-        onClick={() => onChange('catalog')}
+        aria-pressed={activeView === 'exams'}
+        onClick={() => onChange('exams')}
       >
-        E-commerce catalog
+        Exams API
       </button>
     </nav>
   )

@@ -9,8 +9,8 @@ import PremieresSection from './components/PremieresSection/PremieresSection'
 import MovieList from './components/MovieList/MovieList'
 import Footer from './components/Footer/Footer'
 import ViewSwitcher from './components/ViewSwitcher/ViewSwitcher'
-import CatalogPage from './pages/CatalogPage/CatalogPage'
-import ProductFormPage from './pages/ProductFormPage/ProductFormPage'
+import ExamListPage from './pages/ExamListPage/ExamListPage'
+import ExamFormPage from './pages/ExamFormPage/ExamFormPage'
 
 const SEARCH_DELAY_MS = 300 // milliseconds to wait before filtering
 const FAVORITES_STORAGE_KEY = 'cinemax:favorites'
@@ -44,23 +44,14 @@ function App() {
     SEARCH_DELAY_MS,
   )
   const { showToast } = useToast()
-  const [view, setView] = useState('catalog')
-  const [editingProduct, setEditingProduct] = useState(null)
-  const [catalogVersion, setCatalogVersion] = useState(0)
+  const [view, setView] = useState('exams')
+  const [examVersion, setExamVersion] = useState(0)
 
-  const goToCatalog = () => {
-    setEditingProduct(null)
-    setView('catalog')
-  }
+  const goToExams = () => setView('exams')
 
-  const openProductForm = (product = null) => {
-    setEditingProduct(product)
-    setView('product-form')
-  }
-
-  const handleProductSaved = () => {
-    setCatalogVersion((version) => version + 1)
-    goToCatalog()
+  const handleExamCreated = () => {
+    setExamVersion((version) => version + 1)
+    goToExams()
   }
 
   // Persist favorites every time they change.
@@ -107,19 +98,11 @@ function App() {
   return (
     <>
       <ViewSwitcher view={view} onChange={setView} />
-      {view === 'catalog' ? (
-        <CatalogPage
-          key={catalogVersion}
-          onCreate={() => openProductForm(null)}
-          onEdit={openProductForm}
-        />
+      {view === 'exams' ? (
+        <ExamListPage key={examVersion} onCreate={() => setView('exam-form')} />
       ) : null}
-      {view === 'product-form' ? (
-        <ProductFormPage
-          productId={editingProduct?.id}
-          onBack={goToCatalog}
-          onSaved={handleProductSaved}
-        />
+      {view === 'exam-form' ? (
+        <ExamFormPage onBack={goToExams} onCreated={handleExamCreated} />
       ) : null}
       {view === 'movies' ? (
         <>
