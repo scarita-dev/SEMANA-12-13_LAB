@@ -1,0 +1,12 @@
+venv/
+.env
+__pycache__/
+*.py[cod]
+db.sqlite3
+Lab08_DRF-main/media/
+node_modules/
+dist/
+.vite/
+*.log
+.DS_Store
+GLAB-*.md

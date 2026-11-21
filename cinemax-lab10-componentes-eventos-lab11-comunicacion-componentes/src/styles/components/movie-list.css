@@ -1,0 +1,32 @@
+.movie-section {
+  scroll-margin-top: var(--space-4);
+}
+
+.movie-list {
+  display: grid;
+  grid-template-columns: repeat(var(--movie-columns, 1), minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+/* Empty state: no movie matches the search. */
+.movie-list__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-3);
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.movie-list__empty .lead {
+  margin: 0;
+}
+
+@media (max-width: 519px) {
+  .movie-list {
+    gap: var(--space-3);
+  }
+}
