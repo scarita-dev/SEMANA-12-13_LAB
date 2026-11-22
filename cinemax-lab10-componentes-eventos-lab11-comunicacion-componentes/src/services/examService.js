@@ -18,7 +18,8 @@ export async function getExams() {
 }
 
 export async function getExamById(examId) {
-  const response = await apiClient.get(`/exams/${examId}/`)
+  const id = typeof examId === 'object' && examId !== null ? examId.id : examId
+  const response = await apiClient.get(`/exams/${id}/`)
   return response.data
 }
 
@@ -28,10 +29,12 @@ export async function createExam(exam) {
 }
 
 export async function updateExam(examId, exam) {
-  const response = await apiClient.put(`/exams/${examId}/`, exam)
+  const id = typeof examId === 'object' && examId !== null ? examId.id : examId
+  const response = await apiClient.put(`/exams/${id}/`, exam)
   return response.data
 }
 
 export async function deleteExam(examId) {
-  await apiClient.delete(`/exams/${examId}/`)
+  const id = typeof examId === 'object' && examId !== null ? examId.id : examId
+  await apiClient.delete(`/exams/${id}/`)
 }
