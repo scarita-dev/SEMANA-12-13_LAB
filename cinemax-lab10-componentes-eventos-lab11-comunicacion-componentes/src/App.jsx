@@ -11,6 +11,8 @@ import Footer from './components/Footer/Footer'
 import ViewSwitcher from './components/ViewSwitcher/ViewSwitcher'
 import ExamListPage from './pages/ExamListPage/ExamListPage'
 import ExamFormPage from './pages/ExamFormPage/ExamFormPage'
+import CatalogPage from './pages/CatalogPage/CatalogPage'
+import ProductFormPage from './pages/ProductFormPage/ProductFormPage'
 
 const SEARCH_DELAY_MS = 300 // milliseconds to wait before filtering
 const FAVORITES_STORAGE_KEY = 'cinemax:favorites'
@@ -44,14 +46,31 @@ function App() {
     SEARCH_DELAY_MS,
   )
   const { showToast } = useToast()
-  const [view, setView] = useState('exams')
+  const [view, setView] = useState('catalog')
   const [examVersion, setExamVersion] = useState(0)
+  const [editingProduct, setEditingProduct] = useState(null)
+  const [catalogVersion, setCatalogVersion] = useState(0)
 
   const goToExams = () => setView('exams')
 
   const handleExamCreated = () => {
     setExamVersion((version) => version + 1)
     goToExams()
+  }
+
+  const goToCatalog = () => {
+    setEditingProduct(null)
+    setView('catalog')
+  }
+
+  const openProductForm = (product = null) => {
+    setEditingProduct(product)
+    setView('product-form')
+  }
+
+  const handleProductSaved = () => {
+    setCatalogVersion((version) => version + 1)
+    goToCatalog()
   }
 
   // Persist favorites every time they change.
@@ -103,6 +122,20 @@ function App() {
       ) : null}
       {view === 'exam-form' ? (
         <ExamFormPage onBack={goToExams} onCreated={handleExamCreated} />
+      ) : null}
+      {view === 'catalog' ? (
+        <CatalogPage
+          key={catalogVersion}
+          onCreate={() => openProductForm(null)}
+          onEdit={openProductForm}
+        />
+      ) : null}
+      {view === 'product-form' ? (
+        <ProductFormPage
+          productId={editingProduct?.id}
+          onBack={goToCatalog}
+          onSaved={handleProductSaved}
+        />
       ) : null}
       {view === 'movies' ? (
         <>

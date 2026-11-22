@@ -1,27 +1,53 @@
-# Laboratorio 12 — Ajax y Servicios Web
+# Laboratorio 13 — Estructura de una aplicación de comercio electrónico
 
-Esta rama contiene **únicamente** el Laboratorio 12: la API original del Laboratorio 8 (app `quiz`) con CORS configurado y un frontend React que consume los recursos con Axios.
+Rama acumulativa: nace de `lab12-ajax-web-services` y añade el catálogo completo. Mantiene la vista `Exams API` del Laboratorio 12 y el proyecto de películas del Laboratorio 11.
 
-## Estructura
+## Arquitectura servidor / cliente
 
-- `Lab08_DRF-main/`: proyecto Django REST con `quiz` (`exams`, `questions`, `options`), `django-cors-headers` y los orígenes exactos permitidos.
-- `cinemax-lab10-componentes-eventos-lab11-comunicacion-componentes/`: proyecto React del Laboratorio 11 más la vista `Exams API`, el cliente único de Axios y los tres estados de petición.
+### Servidor (`Lab08_DRF-main/`)
 
-## Levantar el backend
+- `config/settings.py`: `corsheaders`, orígenes exactos, `MEDIA_URL` / `MEDIA_ROOT` y variables de entorno para secretos.
+- `config/urls.py`: `DefaultRouter` con `exams`, `questions`, `options`, `categories` y `products`, además del serve de media en desarrollo.
+- `quiz/`: API original del Laboratorio 8.
+- `catalog/`: app nueva del Laboratorio 13.
+  - `models.py`: `Category` y `Product` (nombre, descripción, precio decimal, stock, imagen y FK protegida).
+  - `migrations/0001_initial.py`: migración versionada.
+  - `admin.py`: listados, filtros y búsqueda para ambos modelos.
+  - `serializers.py`: `ProductSerializer` anida `category = CategorySerializer(read_only=True)` y acepta `category_id` de escritura; admite imagen por archivo o `image_url`.
+  - `views.py`: `CategoryViewSet` y `ProductViewSet` con filtro `?category=<id>`.
+  - `management/commands/seed_catalog.py`: genera 3 categorías, 9 productos y sus imágenes locales.
+
+### Cliente (`cinemax-lab10-componentes-eventos-lab11-comunicacion-componentes/`)
+
+- `src/services/apiClient.js`: instancia única de Axios y normalización de errores de red vs. API.
+- `src/services/examService.js`: servicios del Laboratorio 12 sobre `/exams/`.
+- `src/services/categoryService.js` y `src/services/productService.js`: servicios del catálogo.
+- `src/hooks/useExams.js`, `src/hooks/useCatalog.js`, `src/hooks/useProductForm.js`: lógica de estados y peticiones.
+- `src/pages/ExamListPage`, `ExamFormPage`, `CatalogPage`, `ProductFormPage`: vistas.
+- `src/components/RequestError`, `ExamSkeleton`, `CatalogSkeleton`, `ProductCard`, `CategoryFilter`: UI de los tres estados.
+- Ningún componente importa Axios ni escribe URLs: todo pasa por los servicios.
+
+## Endpoints
+
+| Recurso | URL | Filtrado |
+| --- | --- | --- |
+| Exámenes | `http://127.0.0.1:8000/api/exams/` | — |
+| Categorías | `http://127.0.0.1:8000/api/categories/` | `?search=` |
+| Productos | `http://127.0.0.1:8000/api/products/` | `?category=<id>`, `?search=` |
+| Imágenes | `http://127.0.0.1:8000/media/products/<archivo>` | — |
+
+`GET /api/products/` devuelve cada producto con el objeto `category` completo (`id`, `name`, `description`, `created_at`), sin exigir una segunda petición.
+
+## Levantar ambos proyectos
 
 ```powershell
 cd Lab08_DRF-main
 python -m pip install -r requirements.txt
 python manage.py migrate
+python manage.py seed_catalog
 python manage.py check
 python manage.py runserver 127.0.0.1:8000
 ```
-
-Recurso consumido: `http://127.0.0.1:8000/api/exams/`.
-
-CORS permitido (sin comodines): `http://localhost:5173`, `http://127.0.0.1:5173`, `http://localhost:3000`, `http://127.0.0.1:3000`. Se puede sobrescribir con la variable `CORS_ALLOWED_ORIGINS` separada por comas.
-
-## Levantar el frontend
 
 ```powershell
 cd cinemax-lab10-componentes-eventos-lab11-comunicacion-componentes
@@ -29,21 +55,16 @@ npm install
 npm run dev -- --host 127.0.0.1 --port 5173
 ```
 
-La base de la API se define en un solo lugar: `src/services/apiClient.js` (`import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api'`). Ningún componente importa Axios ni escribe URLs.
+Base de la API en un solo sitio: `import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api'`.
 
-## Capa de servicios y estados
+Orígenes CORS permitidos: `http://localhost:5173`, `http://127.0.0.1:5173`, `http://localhost:3000`, `http://127.0.0.1:3000` (sin comodines).
 
-- `src/services/apiClient.js`: instancia única de Axios y normalización de errores (red vs. API).
-- `src/services/examService.js`: `getExams`, `getExamById`, `createExam`, `updateExam`, `deleteExam`.
-- `src/hooks/useExams.js`: estado `loading` / `data` / `error`, reintento y borrado en memoria.
-- `src/components/ExamSkeleton/`: esqueleto animado de carga.
-- `src/components/ExamTable/`: tabla de datos con botón de eliminación.
-- `src/components/RequestError/`: mensaje descriptivo y botón **Retry**.
-- `src/pages/ExamListPage/` y `src/pages/ExamFormPage/`: listado y alta sobre `/api/exams/`.
+## Datos de prueba
 
-## Cómo reproducir las capturas
+- 3 categorías: Electronics, Home and Kitchen, Sports and Outdoors.
+- 9 productos con imagen local generada por la semilla (Wireless Headphones, Mechanical Keyboard, Portable Speaker, Espresso Machine, Ceramic Cookware Set, Air Purifier, Trail Backpack, Yoga Mat, Steel Water Bottle).
 
-1. **Error de CORS:** con React en `http://127.0.0.1:5173`, levanta Django con `$env:CORS_ALLOWED_ORIGINS='http://localhost:3000'; python manage.py runserver 127.0.0.1:8000`. Abre DevTools → Console/Network y recarga; aparece el bloqueo `No 'Access-Control-Allow-Origin' header`. Restaura la variable y reinicia Django.
-2. **Validación HTTP 400:** en `Exams API` pulsa **New exam**, deja `Title` vacío, escribe una descripción y envía. La petición `POST /api/exams/` devuelve 400 y la interfaz muestra `This field may not be blank.` bajo el campo (no hay `required` HTML5).
-3. **Servidor apagado con Retry:** con la lista de exámenes abierta, detén Django (Ctrl+C). La tabla se sustituye por el estado de error con **Retry**; vuelve a levantar Django y pulsa **Retry** sin recargar el navegador.
-4. **Listar, crear y eliminar:** crea un examen, verifica que aparece en la tabla sin recargar y pulsa **Delete** en una fila; la fila desaparece inmediatamente.
+## Capturas sugeridas
+
+- **Laboratorio 12:** cambia a la rama `lab12-ajax-web-services` y sigue su README: error de CORS, validación HTTP 400 en `Exams API` y estado de error con **Retry** al apagar Django.
+- **Laboratorio 13:** en esta rama, abre `E-commerce catalog`; captura el filtrado por categoría (chips cargados desde la API), el alta con `New product`, la edición con `Edit` y la eliminación con `Delete`. Todas las operaciones refrescan la interfaz sin recargar y respetan skeleton / datos / error con **Retry**.

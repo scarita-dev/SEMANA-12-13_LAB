@@ -20,5 +20,9 @@
 @import './components/view-switcher.css';
 @import './components/request-error.css';
 @import './components/exam-page.css';
+@import './components/catalog-page.css';
+@import './components/category-filter.css';
+@import './components/product-card.css';
+@import './components/product-form-page.css';
 /* Last: wins ties against component classes with the same specificity. */
 @import './base/utilities.css';
