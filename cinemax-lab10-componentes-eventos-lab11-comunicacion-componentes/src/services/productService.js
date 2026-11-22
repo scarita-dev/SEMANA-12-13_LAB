@@ -22,7 +22,7 @@ function buildPayload(product) {
   return product
 }
 
-export async function getAll(categoryId) {
+export async function list(categoryId) {
   const params = categoryId ? { category: categoryId } : {}
   const response = await apiClient.get('/products/', { params })
   return unwrapList(response.data)
@@ -50,11 +50,12 @@ export async function remove(productId) {
   await apiClient.delete(`/products/${productId}/`)
 }
 
-export const getProducts = getAll
+export const getAll = list
+export const getProducts = list
 export const getProductById = getById
 export const createProduct = create
 export const updateProduct = update
 export const deleteProduct = remove
 export { remove as delete }
 
-export default { getAll, getById, create, update, delete: remove }
+export default { list, getAll, getById, create, update, delete: remove }
