@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { describeRequestError } from '../services/apiClient'
-import { getCategories } from '../services/categoryService'
-import { deleteProduct, getProducts } from '../services/productService'
+import { getAll as getCategories } from '../services/categoryService'
+import { getAll as getProducts, remove as deleteProduct } from '../services/productService'
 
 export default function useCatalog() {
   const [categories, setCategories] = useState([])
@@ -49,7 +49,8 @@ export default function useCatalog() {
     setReloadToken((token) => token + 1)
   }, [])
 
-  const removeProduct = useCallback(async (productId) => {
+  const removeProduct = useCallback(async (product) => {
+    const productId = product?.id ?? product
     try {
       await deleteProduct(productId)
       setProducts((current) => current.filter((item) => item.id !== productId))

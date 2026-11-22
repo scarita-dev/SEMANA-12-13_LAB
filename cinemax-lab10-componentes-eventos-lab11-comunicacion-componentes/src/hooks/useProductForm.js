@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react'
 import { describeRequestError } from '../services/apiClient'
-import { getCategories } from '../services/categoryService'
-import { createProduct, getProductById, updateProduct } from '../services/productService'
+import { getAll as getCategories } from '../services/categoryService'
+import {
+  create as createProduct,
+  getById as getProductById,
+  update as updateProduct,
+} from '../services/productService'
 
 const EMPTY_FORM = {
   name: '',
